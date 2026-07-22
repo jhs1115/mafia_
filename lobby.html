@@ -40,47 +40,72 @@
         </div>
 
         <div class="lobby-content" id="lobbyContent" hidden>
-          <section class="room-info" aria-labelledby="roomCodeLabel">
-            <div>
-              <p class="room-code-label" id="roomCodeLabel">ROOM CODE</p>
-              <div class="room-code-row">
-                <p class="room-code" id="roomCodeText">------</p>
-                <button type="button" class="copy-button" id="copyRoomCodeButton">복사</button>
-              </div>
+          <div class="lobby-layout">
+            <div class="lobby-main-column">
+              <section class="room-info" aria-labelledby="roomCodeLabel">
+                <div>
+                  <p class="room-code-label" id="roomCodeLabel">ROOM CODE</p>
+                  <div class="room-code-row">
+                    <p class="room-code" id="roomCodeText">------</p>
+                    <button type="button" class="copy-button" id="copyRoomCodeButton">복사</button>
+                  </div>
+                </div>
+
+                <dl class="room-stats">
+                  <div>
+                    <dt>상태</dt>
+                    <dd id="roomStatusText">-</dd>
+                  </div>
+                  <div>
+                    <dt>인원</dt>
+                    <dd><span id="currentPlayersText">-</span> / <span id="maxPlayersText">-</span></dd>
+                  </div>
+                  <div>
+                    <dt>생성 시간</dt>
+                    <dd id="createdAtText">-</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section class="players-section" aria-labelledby="playersTitle">
+                <div class="section-heading">
+                  <h2 id="playersTitle">플레이어</h2>
+                  <span id="playerCountText">0명</span>
+                </div>
+                <div class="start-condition" id="startConditionText" aria-live="polite"></div>
+                <div class="player-list" id="playerList"></div>
+              </section>
+
+              <footer class="lobby-footer">
+                <button type="button" class="secondary-button" id="readyButton">준비하기</button>
+                <button type="button" class="primary-button" id="startGameButton">
+                  <span class="button-spinner" aria-hidden="true"></span>
+                  <span class="button-label">게임 시작</span>
+                </button>
+              </footer>
             </div>
 
-            <dl class="room-stats">
-              <div>
-                <dt>상태</dt>
-                <dd id="roomStatusText">-</dd>
+            <aside class="lobby-chat" id="lobbyChatPanel" aria-labelledby="lobbyChatTitle">
+              <div class="lobby-chat__header">
+                <h2 id="lobbyChatTitle">로비 채팅</h2>
+                <span>전체</span>
               </div>
-              <div>
-                <dt>인원</dt>
-                <dd><span id="currentPlayersText">-</span> / <span id="maxPlayersText">-</span></dd>
-              </div>
-              <div>
-                <dt>생성 시간</dt>
-                <dd id="createdAtText">-</dd>
-              </div>
-            </dl>
-          </section>
-
-          <section class="players-section" aria-labelledby="playersTitle">
-            <div class="section-heading">
-              <h2 id="playersTitle">플레이어</h2>
-              <span id="playerCountText">0명</span>
-            </div>
-            <div class="start-condition" id="startConditionText" aria-live="polite"></div>
-            <div class="player-list" id="playerList"></div>
-          </section>
-
-          <footer class="lobby-footer">
-            <button type="button" class="secondary-button" id="readyButton">준비하기</button>
-            <button type="button" class="primary-button" id="startGameButton">
-              <span class="button-spinner" aria-hidden="true"></span>
-              <span class="button-label">게임 시작</span>
-            </button>
-          </footer>
+              <div class="lobby-chat__list" id="lobbyChatMessageList" aria-live="polite"></div>
+              <form class="lobby-chat__form" id="lobbyChatForm" novalidate>
+                <label class="sr-only" for="lobbyChatInput">로비 채팅 입력</label>
+                <input
+                  type="text"
+                  id="lobbyChatInput"
+                  maxlength="160"
+                  autocomplete="off"
+                  placeholder="메시지 입력"
+                  aria-describedby="lobbyChatNotice"
+                />
+                <button type="submit" class="primary-button" id="lobbyChatSendButton">전송</button>
+              </form>
+              <p class="lobby-chat__notice" id="lobbyChatNotice" aria-live="polite"></p>
+            </aside>
+          </div>
         </div>
       </section>
     </main>

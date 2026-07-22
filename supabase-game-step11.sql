@@ -36,14 +36,33 @@ add column if not exists night_action_completed boolean not null default false,
 add column if not exists night_target_id uuid,
 add column if not exists investigation_result text;
 
+update public.room_players
+set can_vote = true
+where can_vote is null;
+
+update public.room_players
+set has_voted = false
+where has_voted is null;
+
+update public.room_players
+set night_action_completed = false
+where night_action_completed is null;
+
 create table if not exists public.room_messages (
   id uuid primary key default gen_random_uuid(),
   room_id uuid not null references public.rooms(id) on delete cascade,
   player_id uuid not null references public.room_players(id) on delete cascade,
-  channel text not null check (channel in ('day', 'mafia_night')),
+  channel text not null,
   message text not null check (char_length(trim(message)) between 1 and 160),
   created_at timestamptz not null default now()
 );
+
+alter table public.room_messages
+drop constraint if exists room_messages_channel_check;
+
+alter table public.room_messages
+add constraint room_messages_channel_check
+check (channel in ('lobby', 'day', 'mafia_night'));
 
 create index if not exists room_messages_room_id_created_at_idx
 on public.room_messages(room_id, created_at);
@@ -86,7 +105,7 @@ security definer
 set search_path = public
 as $$
   select case
-    when target_phase = 'day_discussion' then 60
+    when target_phase = 'day_discussion' then 20
     when target_phase = 'day_vote' then 30
     when target_phase in ('night_mafia', 'night_police', 'night_doctor') then 25
     when target_phase = 'night_result' then 8
@@ -569,7 +588,7 @@ begin
     where room_id = target_room_id
       and id = voter_player_id
       and is_alive = true
-      and can_vote = true
+      and coalesce(can_vote, true) = true
       and has_voted = false
   ) then
     raise exception 'cannot vote';
@@ -594,7 +613,7 @@ begin
     select 1 from public.room_players
     where room_id = target_room_id
       and is_alive = true
-      and can_vote = true
+      and coalesce(can_vote, true) = true
       and has_voted = false
   ) then
     perform public.resolve_day_vote(target_room_id);

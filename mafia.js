@@ -59,7 +59,7 @@ const GAME_PHASE = {
 };
 
 const GAME_TIME = {
-  DAY_DISCUSSION_SECONDS: 60,
+  DAY_DISCUSSION_SECONDS: 20,
   DAY_VOTE_SECONDS: 30,
   EXECUTION_RESULT_SECONDS: 8,
   NIGHT_ACTION_SECONDS: 25,
@@ -67,7 +67,7 @@ const GAME_TIME = {
 };
 
 const TEST_GAME_TIME = {
-  DAY_DISCUSSION_SECONDS: 10,
+  DAY_DISCUSSION_SECONDS: 20,
   DAY_VOTE_SECONDS: 10,
   EXECUTION_RESULT_SECONDS: 5,
   NIGHT_ACTION_SECONDS: 10,
@@ -1625,12 +1625,19 @@ const lobbyElements = {
   readyButton: document.querySelector("#readyButton"),
   startGameButton: document.querySelector("#startGameButton"),
   startGameButtonLabel: document.querySelector("#startGameButton .button-label"),
+  chatMessageList: document.querySelector("#lobbyChatMessageList"),
+  chatForm: document.querySelector("#lobbyChatForm"),
+  chatInput: document.querySelector("#lobbyChatInput"),
+  chatSendButton: document.querySelector("#lobbyChatSendButton"),
+  chatNotice: document.querySelector("#lobbyChatNotice"),
 };
 
 let currentLobbyRoom = null;
 let currentLobbyPlayers = [];
 let currentLobbyPlayer = null;
+let currentLobbyMessages = [];
 let isStartingGame = false;
+let isSendingLobbyChat = false;
 
 function setLobbyConnectionStatus(message, type) {
   lobbyElements.connectionStatus.textContent = message;
@@ -1798,6 +1805,133 @@ function renderLobbyActions() {
   lobbyElements.startConditionText.classList.toggle("is-error", !validation.canStart);
 }
 
+function getLobbyChatPlayerName(playerId) {
+  const player = currentLobbyPlayers.find(function findPlayer(targetPlayer) {
+    return targetPlayer.id === playerId;
+  });
+
+  return player ? player.nickname : "알 수 없음";
+}
+
+function setLobbyChatNotice(message, type) {
+  lobbyElements.chatNotice.textContent = message;
+  lobbyElements.chatNotice.classList.remove("is-success", "is-error");
+
+  if (type) {
+    lobbyElements.chatNotice.classList.add(`is-${type}`);
+  }
+}
+
+function renderLobbyChatMessages() {
+  lobbyElements.chatMessageList.textContent = "";
+
+  const lobbyMessages = currentLobbyMessages.filter(function filterLobbyMessage(message) {
+    return message.channel === "lobby";
+  });
+
+  if (lobbyMessages.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "chat-empty";
+    empty.textContent = "아직 메시지가 없습니다.";
+    lobbyElements.chatMessageList.appendChild(empty);
+    return;
+  }
+
+  lobbyMessages.forEach(function appendMessage(message) {
+    const item = document.createElement("article");
+    item.className = "chat-message";
+    item.classList.toggle("is-me", currentLobbyPlayer && message.player_id === currentLobbyPlayer.id);
+
+    const meta = document.createElement("div");
+    meta.className = "chat-message__meta";
+
+    const name = document.createElement("span");
+    name.textContent = getLobbyChatPlayerName(message.player_id);
+
+    const time = document.createElement("time");
+    time.dateTime = message.created_at;
+    time.textContent = new Date(message.created_at).toLocaleTimeString("ko-KR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    const text = document.createElement("p");
+    text.textContent = message.message;
+
+    meta.appendChild(name);
+    meta.appendChild(time);
+    item.appendChild(meta);
+    item.appendChild(text);
+    lobbyElements.chatMessageList.appendChild(item);
+  });
+
+  lobbyElements.chatMessageList.scrollTop = lobbyElements.chatMessageList.scrollHeight;
+}
+
+async function loadLobbyChatMessages() {
+  if (!currentLobbyRoom) {
+    return;
+  }
+
+  const { data, error } = await mafiaSupabaseClient
+    .from("room_messages")
+    .select("*")
+    .eq("room_id", currentLobbyRoom.id)
+    .eq("channel", "lobby")
+    .order("created_at", { ascending: true })
+    .limit(200);
+
+  if (error) {
+    console.error("로비 채팅 조회 실패:", error);
+    setLobbyChatNotice("채팅을 불러오지 못했습니다.", "error");
+    return;
+  }
+
+  currentLobbyMessages = data || [];
+  renderLobbyChatMessages();
+}
+
+async function handleLobbyChatSubmit(event) {
+  event.preventDefault();
+
+  if (isSendingLobbyChat || !currentLobbyRoom || !currentLobbyPlayer) {
+    return;
+  }
+
+  const message = lobbyElements.chatInput.value.trim().replace(/\s+/g, " ");
+
+  if (!message) {
+    setLobbyChatNotice("메시지를 입력해주세요.", "error");
+    return;
+  }
+
+  isSendingLobbyChat = true;
+  lobbyElements.chatSendButton.disabled = true;
+
+  try {
+    const { error } = await mafiaSupabaseClient.from("room_messages").insert({
+      room_id: currentLobbyRoom.id,
+      player_id: currentLobbyPlayer.id,
+      channel: "lobby",
+      message,
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    lobbyElements.chatInput.value = "";
+    setLobbyChatNotice("", null);
+    await loadLobbyChatMessages();
+  } catch (error) {
+    console.error("로비 채팅 전송 실패:", error);
+    setLobbyChatNotice("메시지를 보내지 못했습니다.", "error");
+  } finally {
+    isSendingLobbyChat = false;
+    lobbyElements.chatSendButton.disabled = false;
+  }
+}
+
 async function loadLobby() {
   const isConnected = await testLobbySupabaseConnection();
 
@@ -1844,6 +1978,7 @@ async function loadLobby() {
     renderLobbyPlayers(players);
     renderLobbyActions();
     subscribeToLobbyChanges(room.id);
+    await loadLobbyChatMessages();
 
     lobbyElements.loading.hidden = true;
     lobbyElements.error.hidden = true;
@@ -1888,6 +2023,7 @@ async function refreshLobbyData() {
 function subscribeToLobbyChanges(roomId) {
   subscribeToRoomChanges(roomId, refreshLobbyData);
   subscribeToPlayerChanges(roomId, refreshLobbyData);
+  subscribeToChatChanges(roomId, loadLobbyChatMessages);
 }
 
 async function copyRoomCode() {
@@ -1998,6 +2134,7 @@ function initializeLobbyPage() {
   lobbyElements.readyButton.addEventListener("click", handleReadyClick);
   lobbyElements.startGameButton.addEventListener("click", handleStartGameClick);
   lobbyElements.leaveButton.addEventListener("click", handleLeaveClick);
+  lobbyElements.chatForm.addEventListener("submit", handleLobbyChatSubmit);
   window.addEventListener("beforeunload", cleanupSubscriptions);
   loadLobby();
 }
@@ -2525,7 +2662,7 @@ function renderDiscussionScreen() {
 }
 
 function isSelectableVoteTarget(player) {
-  return currentGamePlayer.is_alive && player.is_alive && currentGamePlayer.can_vote;
+  return currentGamePlayer.is_alive && player.is_alive && currentGamePlayer.can_vote !== false;
 }
 
 function isSelectableNightTarget(player) {
@@ -2612,10 +2749,10 @@ function renderVoteTargets() {
 
 function renderVoteProgress() {
   const votedCount = getAlivePlayers().filter(function voted(player) {
-    return player.can_vote && player.has_voted;
+    return player.can_vote !== false && player.has_voted;
   }).length;
   const totalCount = getAlivePlayers().filter(function canVote(player) {
-    return player.can_vote;
+    return player.can_vote !== false;
   }).length;
   showGameMessage(`투표 완료 ${votedCount} / ${totalCount}`, "success");
 }
