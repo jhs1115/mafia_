@@ -37,101 +37,122 @@
         </div>
 
         <section class="game-content" id="gameContent" hidden>
-          <section class="phase-panel" aria-labelledby="phaseTitle">
-            <div>
-              <p class="day-kicker" id="dayNumberText">1일차</p>
-              <h2 id="phaseTitle">-</h2>
-              <p id="phaseDescription">-</p>
-            </div>
-            <div class="timer-box" id="timerBox">
-              <span>남은 시간</span>
-              <strong id="remainingTimeText">--:--</strong>
-            </div>
-          </section>
+          <div class="game-layout">
+            <div class="game-main-column">
+              <section class="phase-panel" aria-labelledby="phaseTitle">
+                <div>
+                  <p class="day-kicker" id="dayNumberText">1일차</p>
+                  <h2 id="phaseTitle">-</h2>
+                  <p id="phaseDescription">-</p>
+                </div>
+                <div class="timer-box" id="timerBox">
+                  <span>남은 시간</span>
+                  <strong id="remainingTimeText">--:--</strong>
+                </div>
+              </section>
 
-          <section class="role-reveal-view" id="roleRevealView" hidden>
-            <div class="role-card" id="roleCard">
-              <div class="role-card__front" id="roleCardFront">
-                <p>당신의 직업을 확인하세요.</p>
-                <span>다른 플레이어에게 화면을 보여주지 마세요.</span>
-                <button type="button" class="primary-button" id="revealRoleButton">
-                  <span class="button-label">직업 확인</span>
+              <section class="role-reveal-view" id="roleRevealView" hidden>
+                <div class="role-card" id="roleCard">
+                  <div class="role-card__front" id="roleCardFront">
+                    <p>당신의 직업을 확인하세요.</p>
+                    <span>다른 플레이어에게 화면을 보여주지 마세요.</span>
+                    <button type="button" class="primary-button" id="revealRoleButton">
+                      <span class="button-label">직업 확인</span>
+                    </button>
+                  </div>
+
+                  <div class="role-card__back" id="roleCardBack" hidden>
+                    <p class="role-title" id="roleTitle">-</p>
+                    <p class="role-description" id="roleDescription">-</p>
+                    <p class="mafia-team" id="mafiaTeamText"></p>
+                    <button type="button" class="primary-button" id="confirmRoleButton">
+                      <span class="button-label">확인 완료</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="seen-waiting" id="seenWaitingView" hidden>
+                  <p>다른 플레이어를 기다리는 중...</p>
+                  <span id="seenCountText">직업 확인 완료 0 / 0</span>
+                  <button type="button" class="ghost-button" id="showRoleAgainButton">직업 다시 보기</button>
+                </div>
+              </section>
+
+              <section class="action-area" id="actionArea" hidden>
+                <div class="player-list" id="targetList"></div>
+                <div class="confirm-box" id="confirmBox" hidden>
+                  <p id="confirmText">선택을 확정하시겠습니까?</p>
+                  <div class="error-actions">
+                    <button type="button" class="primary-button" id="confirmActionButton">
+                      <span class="button-label">확정</span>
+                    </button>
+                    <button type="button" class="secondary-button" id="cancelActionButton">다시 선택</button>
+                  </div>
+                </div>
+              </section>
+
+              <section class="augment-view" id="augmentView" hidden>
+                <div class="augment-heading">
+                  <div>
+                    <h2 id="augmentTitle">증강 선택</h2>
+                    <p id="augmentDescription">세 가지 증강 중 하나를 선택하세요.</p>
+                  </div>
+                  <button type="button" class="ghost-button" id="ownedAugmentsButton">내 증강</button>
+                </div>
+                <div class="augment-cards" id="augmentCards"></div>
+                <div class="confirm-box" id="augmentConfirmBox" hidden>
+                  <p id="augmentConfirmText">이 증강을 선택하시겠습니까?</p>
+                  <div class="error-actions">
+                    <button type="button" class="primary-button" id="confirmAugmentButton">
+                      <span class="button-label">선택 확정</span>
+                    </button>
+                    <button type="button" class="secondary-button" id="cancelAugmentButton">다시 고르기</button>
+                  </div>
+                </div>
+                <div class="owned-augments" id="ownedAugmentsPanel" hidden>
+                  <h3>내 증강</h3>
+                  <div id="ownedAugmentsList"></div>
+                </div>
+              </section>
+
+              <section class="result-panel" id="resultPanel" hidden>
+                <h2 id="resultTitle">결과</h2>
+                <p id="resultText">-</p>
+                <button type="button" class="primary-button" id="nextPhaseButton">
+                  <span class="button-label">다음으로</span>
                 </button>
+              </section>
+
+              <section class="players-section" aria-labelledby="playersTitle">
+                <div class="section-heading">
+                  <h2 id="playersTitle">플레이어</h2>
+                  <span id="playerCountText">0명</span>
+                </div>
+                <div class="player-list" id="gamePlayerList"></div>
+              </section>
+            </div>
+
+            <aside class="game-chat" id="gameChatPanel" aria-labelledby="chatTitle">
+              <div class="game-chat__header">
+                <h2 id="chatTitle">채팅</h2>
+                <span id="chatModeText">-</span>
               </div>
-
-              <div class="role-card__back" id="roleCardBack" hidden>
-                <p class="role-title" id="roleTitle">-</p>
-                <p class="role-description" id="roleDescription">-</p>
-                <p class="mafia-team" id="mafiaTeamText"></p>
-                <button type="button" class="primary-button" id="confirmRoleButton">
-                  <span class="button-label">확인 완료</span>
-                </button>
-              </div>
-            </div>
-
-            <div class="seen-waiting" id="seenWaitingView" hidden>
-              <p>다른 플레이어를 기다리는 중...</p>
-              <span id="seenCountText">직업 확인 완료 0 / 0</span>
-              <button type="button" class="ghost-button" id="showRoleAgainButton">직업 다시 보기</button>
-            </div>
-          </section>
-
-          <section class="action-area" id="actionArea" hidden>
-            <div class="player-list" id="targetList"></div>
-            <div class="confirm-box" id="confirmBox" hidden>
-              <p id="confirmText">선택을 확정하시겠습니까?</p>
-              <div class="error-actions">
-                <button type="button" class="primary-button" id="confirmActionButton">
-                  <span class="button-label">확정</span>
-                </button>
-                <button type="button" class="secondary-button" id="cancelActionButton">다시 선택</button>
-              </div>
-            </div>
-          </section>
-
-          <section class="augment-view" id="augmentView" hidden>
-            <div class="augment-heading">
-              <div>
-                <h2 id="augmentTitle">증강 선택</h2>
-                <p id="augmentDescription">세 가지 증강 중 하나를 선택하세요.</p>
-              </div>
-              <button type="button" class="ghost-button" id="ownedAugmentsButton">내 증강</button>
-            </div>
-            <div class="augment-cards" id="augmentCards"></div>
-            <div class="confirm-box" id="augmentConfirmBox" hidden>
-              <p id="augmentConfirmText">이 증강을 선택하시겠습니까?</p>
-              <div class="error-actions">
-                <button type="button" class="primary-button" id="confirmAugmentButton">
-                  <span class="button-label">선택 확정</span>
-                </button>
-                <button type="button" class="secondary-button" id="cancelAugmentButton">다시 고르기</button>
-              </div>
-            </div>
-            <div class="owned-augments" id="ownedAugmentsPanel" hidden>
-              <h3>내 증강</h3>
-              <div id="ownedAugmentsList"></div>
-            </div>
-          </section>
-
-          <section class="result-panel" id="resultPanel" hidden>
-            <h2 id="resultTitle">결과</h2>
-            <p id="resultText">-</p>
-            <button type="button" class="primary-button" id="nextPhaseButton">
-              <span class="button-label">다음으로</span>
-            </button>
-          </section>
-
-          <section class="players-section" aria-labelledby="playersTitle">
-            <div class="section-heading">
-              <h2 id="playersTitle">플레이어</h2>
-              <span id="playerCountText">0명</span>
-            </div>
-            <div class="player-list" id="gamePlayerList"></div>
-          </section>
-
-          <section class="chat-placeholder" id="chatPlaceholder">
-            채팅 기능은 이후 작업에서 추가됩니다.
-          </section>
+              <div class="game-chat__list" id="chatMessageList" aria-live="polite"></div>
+              <form class="game-chat__form" id="chatForm" novalidate>
+                <label class="sr-only" for="chatInput">채팅 입력</label>
+                <input
+                  type="text"
+                  id="chatInput"
+                  maxlength="160"
+                  autocomplete="off"
+                  placeholder="메시지 입력"
+                  aria-describedby="chatNotice"
+                />
+                <button type="submit" class="primary-button" id="chatSendButton">전송</button>
+              </form>
+              <p class="game-chat__notice" id="chatNotice" aria-live="polite"></p>
+            </aside>
+          </div>
         </section>
       </section>
     </main>
