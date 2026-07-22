@@ -1848,3 +1848,229 @@ body {
     width: 100%;
   }
 }
+
+/* Avatar settings and late-stage UI polish */
+.game-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(430px, 560px);
+}
+
+.game-side-column {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 16px;
+}
+
+.avatar-settings {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(82, 214, 200, 0.24);
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(82, 214, 200, 0.08), transparent 42%),
+    rgba(9, 11, 16, 0.68);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.22);
+}
+
+.avatar-settings__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.panel-kicker {
+  margin: 0 0 5px;
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.avatar-settings h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.avatar-preview {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  box-shadow: 0 0 0 5px rgba(82, 214, 200, 0.08);
+}
+
+.avatar-option-block {
+  display: grid;
+  gap: 10px;
+}
+
+.avatar-option-block + .avatar-option-block {
+  margin-top: 14px;
+}
+
+.avatar-option-block p {
+  margin: 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.avatar-color-options,
+.avatar-symbol-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.avatar-color-button,
+.avatar-symbol-button {
+  min-width: 46px;
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.avatar-color-button {
+  width: 46px;
+  padding: 0;
+}
+
+.avatar-symbol-button {
+  padding: 0 14px;
+  color: var(--text-main);
+  background: rgba(23, 28, 38, 0.72);
+  font-weight: 900;
+}
+
+.avatar-color-button:hover,
+.avatar-symbol-button:hover,
+.avatar-color-button:focus-visible,
+.avatar-symbol-button:focus-visible,
+.player-card:hover,
+.target-card:hover,
+.augment-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(82, 214, 200, 0.56);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.22);
+}
+
+.avatar-color-button.is-selected,
+.avatar-symbol-button.is-selected {
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 3px rgba(82, 214, 200, 0.16),
+    0 14px 32px rgba(0, 0, 0, 0.22);
+}
+
+.avatar-settings__message {
+  min-height: 18px;
+  margin: 12px 0 0;
+  color: var(--text-sub);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.avatar-settings__message.is-success {
+  color: var(--success);
+}
+
+.avatar-settings__message.is-error {
+  color: var(--danger);
+}
+
+.player-avatar.is-avatar-cyan,
+.avatar-color-button.is-avatar-cyan {
+  background: linear-gradient(135deg, #5be0d4, #7d8ff7);
+}
+
+.player-avatar.is-avatar-violet,
+.avatar-color-button.is-avatar-violet {
+  background: linear-gradient(135deg, #9b86ff, #5be0d4);
+}
+
+.player-avatar.is-avatar-red,
+.avatar-color-button.is-avatar-red {
+  background: linear-gradient(135deg, #ef6a73, #f4a261);
+}
+
+.player-avatar.is-avatar-gold,
+.avatar-color-button.is-avatar-gold {
+  background: linear-gradient(135deg, #f1c86b, #7ed7c1);
+}
+
+.player-avatar.is-avatar-green,
+.avatar-color-button.is-avatar-green {
+  background: linear-gradient(135deg, #6dd199, #52d6c8);
+}
+
+.player-avatar.is-avatar-blue,
+.avatar-color-button.is-avatar-blue {
+  background: linear-gradient(135deg, #6597e8, #7d8ff7);
+}
+
+.player-card,
+.target-card,
+.augment-card,
+.phase-panel,
+.players-section,
+.action-area,
+.result-panel,
+.game-chat,
+.lobby-chat {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.game-chat {
+  height: auto;
+}
+
+@media (max-width: 1100px) {
+  .game-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .game-side-column {
+    height: 640px;
+  }
+}
+
+@media (max-width: 760px) {
+  .game-side-column {
+    height: auto;
+    overflow: visible;
+  }
+
+  .avatar-settings {
+    padding: 16px;
+  }
+
+  .game-chat {
+    min-height: 420px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .avatar-color-button,
+  .avatar-symbol-button,
+  .player-card,
+  .target-card,
+  .augment-card {
+    transition: none;
+    transform: none;
+  }
+}

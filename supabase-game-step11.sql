@@ -34,7 +34,9 @@ add column if not exists has_voted boolean not null default false,
 add column if not exists vote_target_id uuid,
 add column if not exists night_action_completed boolean not null default false,
 add column if not exists night_target_id uuid,
-add column if not exists investigation_result text;
+add column if not exists investigation_result text,
+add column if not exists avatar_color text not null default 'cyan',
+add column if not exists avatar_symbol text not null default 'auto';
 
 update public.room_players
 set can_vote = true
@@ -47,6 +49,23 @@ where has_voted is null;
 update public.room_players
 set night_action_completed = false
 where night_action_completed is null;
+
+update public.room_players
+set avatar_color = 'cyan'
+where avatar_color is null;
+
+update public.room_players
+set avatar_symbol = 'auto'
+where avatar_symbol is null;
+
+-- 개발용 정책: 로그인/권한 구조를 더 단단히 만들기 전까지 플레이어 정보 업데이트를 허용합니다.
+-- 현재 클라이언트에서는 아바타 색상과 표시값 저장에 사용합니다.
+drop policy if exists "dev room players update" on public.room_players;
+create policy "dev room players update"
+on public.room_players for update
+to anon, authenticated
+using (true)
+with check (true);
 
 create table if not exists public.room_messages (
   id uuid primary key default gen_random_uuid(),

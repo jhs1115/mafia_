@@ -76,6 +76,23 @@ const TEST_GAME_TIME = {
 
 const ACTIVE_GAME_TIME = TEST_GAME_TIME;
 
+const AVATAR_COLORS = {
+  cyan: { label: "청록", className: "is-avatar-cyan" },
+  violet: { label: "보라", className: "is-avatar-violet" },
+  red: { label: "붉은색", className: "is-avatar-red" },
+  gold: { label: "금색", className: "is-avatar-gold" },
+  green: { label: "초록", className: "is-avatar-green" },
+  blue: { label: "파랑", className: "is-avatar-blue" },
+};
+
+const AVATAR_SYMBOLS = [
+  { value: "auto", label: "번호" },
+  { value: "star", label: "★" },
+  { value: "diamond", label: "◆" },
+  { value: "circle", label: "●" },
+  { value: "am", label: "AM" },
+];
+
 const PLAYER_ROLE = {
   MAFIA: "mafia",
   CITIZEN: "citizen",
@@ -105,6 +122,8 @@ window.ROLE_DESCRIPTIONS = ROLE_DESCRIPTIONS;
 window.GAME_TIME = GAME_TIME;
 window.TEST_GAME_TIME = TEST_GAME_TIME;
 window.ACTIVE_GAME_TIME = ACTIVE_GAME_TIME;
+window.AVATAR_COLORS = AVATAR_COLORS;
+window.AVATAR_SYMBOLS = AVATAR_SYMBOLS;
 
 
 /* js/room.js */
@@ -303,6 +322,8 @@ async function createRoomWithHost(nickname, authenticatedUserId) {
     is_ready: false,
     is_alive: true,
     has_seen_role: false,
+    avatar_color: "cyan",
+    avatar_symbol: "auto",
   };
 
   const { data: player, error: playerError } = await mafiaSupabaseClient
@@ -384,6 +405,8 @@ async function joinRoomByCode(roomCode, nickname, authenticatedUserId) {
       is_ready: false,
       is_alive: true,
       has_seen_role: false,
+      avatar_color: "cyan",
+      avatar_symbol: "auto",
     })
     .select()
     .single();
@@ -847,6 +870,40 @@ function getCurrentRoomCode() {
 
   const savedRoom = getSavedCurrentRoom();
   return savedRoom && savedRoom.roomCode ? savedRoom.roomCode : "";
+}
+
+function getAvatarColorKey(player) {
+  return player && AVATAR_COLORS[player.avatar_color] ? player.avatar_color : "cyan";
+}
+
+function getAvatarSymbolLabel(symbolValue) {
+  const symbol = AVATAR_SYMBOLS.find(function findSymbol(option) {
+    return option.value === symbolValue;
+  });
+
+  return symbol ? symbol.label : "번호";
+}
+
+function getAvatarText(player) {
+  if (!player) {
+    return "?";
+  }
+
+  if (player.avatar_symbol && player.avatar_symbol !== "auto") {
+    return getAvatarSymbolLabel(player.avatar_symbol);
+  }
+
+  if (player.player_order) {
+    return String(player.player_order);
+  }
+
+  return player.nickname ? player.nickname.trim().charAt(0).toUpperCase() : "?";
+}
+
+function applyAvatarElement(avatarElement, player) {
+  const color = getAvatarColorKey(player);
+  avatarElement.classList.add(AVATAR_COLORS[color].className);
+  avatarElement.textContent = getAvatarText(player);
 }
 
 async function fetchRoomByCode(roomCode) {
@@ -1759,7 +1816,7 @@ function renderLobbyPlayers(players) {
 
     const avatar = document.createElement("div");
     avatar.className = "player-avatar";
-    avatar.textContent = getPlayerInitial(player.nickname);
+    applyAvatarElement(avatar, player);
 
     const info = document.createElement("div");
 
@@ -2193,6 +2250,11 @@ const gameElements = {
   nextPhaseButton: document.querySelector("#nextPhaseButton"),
   playerCountText: document.querySelector("#playerCountText"),
   playerList: document.querySelector("#gamePlayerList"),
+  avatarSettingsPanel: document.querySelector("#avatarSettingsPanel"),
+  avatarPreview: document.querySelector("#avatarPreview"),
+  avatarColorOptions: document.querySelector("#avatarColorOptions"),
+  avatarSymbolOptions: document.querySelector("#avatarSymbolOptions"),
+  avatarSettingsMessage: document.querySelector("#avatarSettingsMessage"),
   chatPlaceholder: document.querySelector("#chatPlaceholder"),
   chatPanel: document.querySelector("#gameChatPanel"),
   chatModeText: document.querySelector("#chatModeText"),
@@ -2558,7 +2620,7 @@ function createPlayerCard(player, revealRole) {
 
   const avatar = document.createElement("div");
   avatar.className = "player-avatar";
-  avatar.textContent = player.player_order ? String(player.player_order) : "?";
+  applyAvatarElement(avatar, player);
 
   const info = document.createElement("div");
   const name = document.createElement("p");
@@ -2599,6 +2661,94 @@ function renderPlayerList(revealRoles) {
   players.forEach(function appendPlayer(player) {
     gameElements.playerList.appendChild(createPlayerCard(player, revealRoles));
   });
+}
+
+function setAvatarSettingsMessage(message, type) {
+  if (!gameElements.avatarSettingsMessage) {
+    return;
+  }
+
+  gameElements.avatarSettingsMessage.textContent = message;
+  gameElements.avatarSettingsMessage.classList.remove("is-success", "is-error");
+
+  if (type) {
+    gameElements.avatarSettingsMessage.classList.add(`is-${type}`);
+  }
+}
+
+function renderAvatarSettings() {
+  if (!gameElements.avatarSettingsPanel || !currentGamePlayer) {
+    return;
+  }
+
+  gameElements.avatarPreview.className = "avatar-preview player-avatar";
+  applyAvatarElement(gameElements.avatarPreview, currentGamePlayer);
+
+  gameElements.avatarColorOptions.textContent = "";
+  Object.keys(AVATAR_COLORS).forEach(function renderColorButton(colorKey) {
+    const option = AVATAR_COLORS[colorKey];
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = `avatar-color-button ${option.className}`;
+    button.setAttribute("aria-label", `${option.label} 색상`);
+    button.classList.toggle("is-selected", getAvatarColorKey(currentGamePlayer) === colorKey);
+    button.addEventListener("click", function handleColorClick() {
+      updateMyAvatar({ avatar_color: colorKey });
+    });
+    gameElements.avatarColorOptions.appendChild(button);
+  });
+
+  gameElements.avatarSymbolOptions.textContent = "";
+  AVATAR_SYMBOLS.forEach(function renderSymbolButton(symbol) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "avatar-symbol-button";
+    button.textContent = symbol.value === "auto" ? "번호" : symbol.label;
+    button.classList.toggle("is-selected", (currentGamePlayer.avatar_symbol || "auto") === symbol.value);
+    button.addEventListener("click", function handleSymbolClick() {
+      updateMyAvatar({ avatar_symbol: symbol.value });
+    });
+    gameElements.avatarSymbolOptions.appendChild(button);
+  });
+}
+
+async function updateMyAvatar(updatePayload) {
+  if (!currentGameRoom || !currentGamePlayer) {
+    return;
+  }
+
+  const previousPlayer = { ...currentGamePlayer };
+  currentGamePlayer = { ...currentGamePlayer, ...updatePayload };
+  currentGamePlayers = currentGamePlayers.map(function updatePlayer(player) {
+    return player.id === currentGamePlayer.id ? currentGamePlayer : player;
+  });
+
+  renderAvatarSettings();
+  renderPlayerList(currentGameRoom.phase === GAME_PHASE.GAME_OVER);
+  setAvatarSettingsMessage("저장 중...", null);
+
+  try {
+    const { error } = await mafiaSupabaseClient
+      .from("room_players")
+      .update(updatePayload)
+      .eq("id", currentGamePlayer.id)
+      .eq("room_id", currentGameRoom.id);
+
+    if (error) {
+      throw error;
+    }
+
+    setAvatarSettingsMessage("아바타가 저장되었습니다.", "success");
+  } catch (error) {
+    console.error("아바타 저장 실패:", error);
+    currentGamePlayer = previousPlayer;
+    currentGamePlayers = currentGamePlayers.map(function restorePlayer(player) {
+      return player.id === previousPlayer.id ? previousPlayer : player;
+    });
+    renderAvatarSettings();
+    renderPlayerList(currentGameRoom.phase === GAME_PHASE.GAME_OVER);
+    setAvatarSettingsMessage("아바타를 저장하지 못했습니다.", "error");
+  }
 }
 
 function getMafiaTeammates() {
@@ -3214,6 +3364,7 @@ function renderGameOver() {
 function renderGameScreen() {
   showGameContent();
   renderPlayerList(currentGameRoom.phase === GAME_PHASE.GAME_OVER);
+  renderAvatarSettings();
   gameElements.nextPhaseButton.textContent = "다음으로";
 
   if (currentGameRoom.phase === GAME_PHASE.ROLE_REVEAL) {

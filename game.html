@@ -132,7 +132,27 @@
               </section>
             </div>
 
-            <aside class="game-chat" id="gameChatPanel" aria-labelledby="chatTitle">
+            <aside class="game-side-column" aria-label="게임 보조 패널">
+              <section class="avatar-settings" id="avatarSettingsPanel" aria-labelledby="avatarSettingsTitle">
+                <div class="avatar-settings__header">
+                  <div>
+                    <p class="panel-kicker">PROFILE</p>
+                    <h2 id="avatarSettingsTitle">내 아바타</h2>
+                  </div>
+                  <div class="avatar-preview player-avatar" id="avatarPreview" aria-hidden="true">?</div>
+                </div>
+                <div class="avatar-option-block">
+                  <p>색상</p>
+                  <div class="avatar-color-options" id="avatarColorOptions" role="group" aria-label="아바타 색상"></div>
+                </div>
+                <div class="avatar-option-block">
+                  <p>표시</p>
+                  <div class="avatar-symbol-options" id="avatarSymbolOptions" role="group" aria-label="아바타 표시"></div>
+                </div>
+                <p class="avatar-settings__message" id="avatarSettingsMessage" aria-live="polite"></p>
+              </section>
+
+              <section class="game-chat" id="gameChatPanel" aria-labelledby="chatTitle">
               <div class="game-chat__header">
                 <h2 id="chatTitle">채팅</h2>
                 <span id="chatModeText">-</span>
@@ -151,6 +171,7 @@
                 <button type="submit" class="primary-button" id="chatSendButton">전송</button>
               </form>
               <p class="game-chat__notice" id="chatNotice" aria-live="polite"></p>
+              </section>
             </aside>
           </div>
         </section>
