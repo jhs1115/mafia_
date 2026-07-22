@@ -916,13 +916,115 @@ input:focus {
   gap: 16px;
 }
 
+.action-area.is-night-action {
+  position: relative;
+  overflow: hidden;
+  border-color: rgba(139, 124, 246, 0.34);
+  background:
+    radial-gradient(circle at 10% 0%, rgba(139, 124, 246, 0.18), transparent 34%),
+    radial-gradient(circle at 100% 100%, rgba(82, 214, 200, 0.09), transparent 36%),
+    rgba(9, 11, 16, 0.68);
+}
+
+.action-area.is-mafia-night {
+  border-color: rgba(216, 100, 112, 0.5);
+}
+
+.action-area.is-police-night {
+  border-color: rgba(101, 151, 232, 0.5);
+}
+
+.action-area.is-doctor-night {
+  border-color: rgba(109, 199, 154, 0.5);
+}
+
+.night-action-banner {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 4px;
+  padding: 16px;
+  border: 1px solid rgba(139, 124, 246, 0.28);
+  border-radius: 8px;
+  background: rgba(9, 11, 16, 0.58);
+}
+
+.night-action-icon {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(139, 124, 246, 0.42);
+  border-radius: 50%;
+  color: var(--text-main);
+  background: rgba(139, 124, 246, 0.16);
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.is-mafia-night .night-action-icon {
+  border-color: rgba(216, 100, 112, 0.55);
+  color: #ff9ca7;
+  background: rgba(216, 100, 112, 0.16);
+}
+
+.is-police-night .night-action-icon {
+  border-color: rgba(101, 151, 232, 0.55);
+  color: #a9c8ff;
+  background: rgba(101, 151, 232, 0.16);
+}
+
+.is-doctor-night .night-action-icon {
+  border-color: rgba(109, 199, 154, 0.55);
+  color: #9be3bd;
+  background: rgba(109, 199, 154, 0.16);
+}
+
+.night-action-banner p {
+  margin: 0 0 5px;
+  color: var(--text-main);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.night-action-banner span {
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+
 .target-card {
   text-align: left;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease,
+    background 160ms ease,
+    opacity 160ms ease;
+}
+
+.target-card.is-actionable:hover,
+.target-card.is-actionable:focus-visible {
+  transform: translateY(-3px);
+  border-color: rgba(82, 214, 200, 0.5);
+  background: rgba(23, 28, 38, 0.82);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.26), 0 0 0 3px rgba(82, 214, 200, 0.12);
+}
+
+.target-card.is-night-target.is-actionable:hover,
+.target-card.is-night-target.is-actionable:focus-visible {
+  border-color: rgba(139, 124, 246, 0.62);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.3), 0 0 0 3px rgba(139, 124, 246, 0.14);
 }
 
 .target-card.is-selected {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(82, 214, 200, 0.11);
+}
+
+.target-card.is-night-target.is-selected {
+  border-color: rgba(139, 124, 246, 0.8);
+  box-shadow: 0 0 0 3px rgba(139, 124, 246, 0.16);
 }
 
 .target-card:disabled {
@@ -1129,21 +1231,21 @@ input:focus {
 }
 
 .game-shell {
-  width: min(100%, 1280px);
-  max-height: calc(100vh - 56px);
+  width: min(100%, 1520px);
+  max-height: calc(100vh - 40px);
   overflow: hidden;
 }
 
 .game-layout {
   min-height: 0;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
-  gap: 18px;
+  grid-template-columns: minmax(0, 1fr) minmax(380px, 520px);
+  gap: 24px;
 }
 
 .game-main-column {
   min-width: 0;
-  max-height: calc(100vh - 178px);
+  max-height: calc(100vh - 162px);
   display: grid;
   gap: 20px;
   overflow-y: auto;
@@ -1174,11 +1276,11 @@ input:focus {
 
 .game-chat {
   min-height: 0;
-  max-height: calc(100vh - 178px);
+  max-height: calc(100vh - 162px);
   display: grid;
   grid-template-rows: auto minmax(0, 1fr) auto auto;
-  gap: 12px;
-  padding: 18px;
+  gap: 16px;
+  padding: 22px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(9, 11, 16, 0.5);
@@ -1193,22 +1295,22 @@ input:focus {
 
 .game-chat__header h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 26px;
 }
 
 .game-chat__header span {
   color: var(--accent);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 900;
 }
 
 .game-chat__list {
-  min-height: 260px;
+  min-height: 480px;
   overflow-y: auto;
   display: grid;
   align-content: start;
-  gap: 10px;
-  padding-right: 4px;
+  gap: 12px;
+  padding-right: 6px;
 }
 
 .chat-empty,
@@ -1229,8 +1331,8 @@ input:focus {
 
 .chat-message {
   display: grid;
-  gap: 6px;
-  padding: 10px;
+  gap: 8px;
+  padding: 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(23, 28, 38, 0.62);
@@ -1252,23 +1354,23 @@ input:focus {
 .chat-message p {
   margin: 0;
   color: var(--text-main);
-  line-height: 1.5;
+  line-height: 1.6;
   overflow-wrap: anywhere;
 }
 
 .game-chat__form {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
+  gap: 10px;
 }
 
 .game-chat__form input,
 .game-chat__form button {
-  min-height: 44px;
+  min-height: 52px;
 }
 
 .game-chat__form button {
-  padding: 0 14px;
+  padding: 0 20px;
 }
 
 @media (max-width: 760px) {

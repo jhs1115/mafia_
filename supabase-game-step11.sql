@@ -657,6 +657,16 @@ begin
     where id = target_room_id;
 
   elsif target_room.phase = 'night_police' and target_role = 'police' then
+    if not exists (
+      select 1 from public.room_players
+      where room_id = target_room_id
+        and id = target_player_id
+        and is_alive = true
+        and id <> acting_player_id
+    ) then
+      raise exception 'invalid police target';
+    end if;
+
     update public.room_players
     set night_action_completed = true,
         night_target_id = target_player_id,
@@ -668,6 +678,15 @@ begin
       and id = acting_player_id;
 
   elsif target_room.phase = 'night_doctor' and target_role = 'doctor' then
+    if not exists (
+      select 1 from public.room_players
+      where room_id = target_room_id
+        and id = target_player_id
+        and is_alive = true
+    ) then
+      raise exception 'invalid doctor target';
+    end if;
+
     update public.room_players
     set night_action_completed = true,
         night_target_id = target_player_id
@@ -679,6 +698,54 @@ begin
     where id = target_room_id;
   else
     raise exception 'not your night phase';
+  end if;
+
+  if target_room.phase = 'night_mafia' and not exists (
+    select 1 from public.room_players
+    where room_id = target_room_id
+      and is_alive = true
+      and role = 'mafia'
+      and night_action_completed = false
+  ) then
+    update public.room_players
+    set night_action_completed = false,
+        night_target_id = null
+    where room_id = target_room_id;
+
+    update public.rooms
+    set phase = 'night_police',
+        phase_started_at = now(),
+        phase_ends_at = public.game_phase_end('night_police')
+    where id = target_room_id;
+  end if;
+
+  if target_room.phase = 'night_police' and not exists (
+    select 1 from public.room_players
+    where room_id = target_room_id
+      and is_alive = true
+      and role = 'police'
+      and night_action_completed = false
+  ) then
+    update public.room_players
+    set night_action_completed = false,
+        night_target_id = null
+    where room_id = target_room_id;
+
+    update public.rooms
+    set phase = 'night_doctor',
+        phase_started_at = now(),
+        phase_ends_at = public.game_phase_end('night_doctor')
+    where id = target_room_id;
+  end if;
+
+  if target_room.phase = 'night_doctor' and not exists (
+    select 1 from public.room_players
+    where room_id = target_room_id
+      and is_alive = true
+      and role = 'doctor'
+      and night_action_completed = false
+  ) then
+    perform public.resolve_night(target_room_id);
   end if;
 
   return jsonb_build_object('ok', true);

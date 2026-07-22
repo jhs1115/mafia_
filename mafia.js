@@ -2080,6 +2080,10 @@ let isSubmitting = false;
 let phaseTimerId = null;
 let hasRequestedTimerTransition = false;
 let isSendingChat = false;
+let isGameStateLoading = false;
+let shouldReloadGameState = false;
+let gameStateRefreshTimerId = null;
+let hasVerifiedGameConnection = false;
 
 function setGameConnectionStatus(message, type) {
   gameElements.connectionStatus.textContent = message;
@@ -2230,7 +2234,7 @@ async function loadChatMessages() {
     .select("*")
     .eq("room_id", currentGameRoom.id)
     .order("created_at", { ascending: true })
-    .limit(120);
+    .limit(300);
 
   if (error) {
     console.error("채팅 조회 실패:", error);
@@ -2290,6 +2294,10 @@ async function handleChatSubmit(event) {
 }
 
 async function testGameSupabaseConnection() {
+  if (hasVerifiedGameConnection) {
+    return true;
+  }
+
   if (!mafiaSupabaseClient) {
     setGameConnectionStatus("Supabase 연결 실패", "error");
     return false;
@@ -2305,6 +2313,7 @@ async function testGameSupabaseConnection() {
     }
 
     setGameConnectionStatus("Supabase 연결 성공", "success");
+    hasVerifiedGameConnection = true;
     return true;
   } catch (error) {
     console.error("Supabase 연결 실패:", error);
@@ -2322,6 +2331,7 @@ function setPhaseHeader(title, description) {
 function hidePhaseViews() {
   gameElements.roleRevealView.hidden = true;
   gameElements.actionArea.hidden = true;
+  gameElements.actionArea.classList.remove("is-night-action", "is-mafia-night", "is-police-night", "is-doctor-night");
   gameElements.augmentView.hidden = true;
   gameElements.confirmBox.hidden = true;
   gameElements.augmentConfirmBox.hidden = true;
@@ -2544,6 +2554,8 @@ function createTargetButton(player, label) {
   button.className = "player-card target-card";
   button.disabled = !label;
   button.classList.toggle("is-selected", selectedTargetId === player.id);
+  button.classList.toggle("is-actionable", Boolean(label));
+  button.classList.toggle("is-night-target", pendingActionType === "night");
 
   const card = createPlayerCard(player, false);
   button.appendChild(card.firstChild);
@@ -2552,9 +2564,9 @@ function createTargetButton(player, label) {
   if (label) {
     button.addEventListener("click", function handleTargetClick() {
       selectedTargetId = player.id;
+      renderCurrentActionTargets();
       gameElements.confirmText.textContent = label.replace("{nickname}", player.nickname);
       gameElements.confirmBox.hidden = false;
-      renderCurrentActionTargets();
     });
   }
 
@@ -2933,12 +2945,69 @@ function playerCanActAtNight() {
   return false;
 }
 
+function getNightActionThemeClass() {
+  if (currentGameRoom.phase === GAME_PHASE.NIGHT_MAFIA) {
+    return "is-mafia-night";
+  }
+
+  if (currentGameRoom.phase === GAME_PHASE.NIGHT_POLICE) {
+    return "is-police-night";
+  }
+
+  if (currentGameRoom.phase === GAME_PHASE.NIGHT_DOCTOR) {
+    return "is-doctor-night";
+  }
+
+  return "";
+}
+
+function getNightActionDescription() {
+  if (currentGameRoom.phase === GAME_PHASE.NIGHT_MAFIA) {
+    return "마피아는 시민 진영 한 명을 공격 대상으로 선택합니다.";
+  }
+
+  if (currentGameRoom.phase === GAME_PHASE.NIGHT_POLICE) {
+    return "경찰은 한 명을 조사해 마피아 여부를 확인합니다.";
+  }
+
+  return "의사는 한 명을 선택해 밤 공격으로부터 보호합니다.";
+}
+
+function renderNightActionBanner() {
+  const banner = document.createElement("div");
+  banner.className = "night-action-banner";
+
+  const icon = document.createElement("div");
+  icon.className = "night-action-icon";
+  icon.textContent = currentGameRoom.phase === GAME_PHASE.NIGHT_MAFIA
+    ? "M"
+    : currentGameRoom.phase === GAME_PHASE.NIGHT_POLICE
+      ? "P"
+      : "D";
+
+  const textBox = document.createElement("div");
+  const title = document.createElement("p");
+  title.textContent = getNightPhaseTitle();
+
+  const description = document.createElement("span");
+  description.textContent = getNightActionDescription();
+
+  textBox.appendChild(title);
+  textBox.appendChild(description);
+  banner.appendChild(icon);
+  banner.appendChild(textBox);
+  gameElements.targetList.appendChild(banner);
+}
+
 function renderNightTargets() {
   hidePhaseViews();
   gameElements.actionArea.hidden = false;
+  gameElements.actionArea.classList.add("is-night-action");
+  gameElements.actionArea.classList.add(getNightActionThemeClass());
   setPhaseHeader(`${currentGameRoom.day_number}일차 밤`, getNightPhaseTitle());
   pendingActionType = "night";
   gameElements.targetList.textContent = "";
+  renderNightActionBanner();
 
   if (!playerCanActAtNight() || currentGamePlayer.night_action_completed) {
     const notice = document.createElement("p");
@@ -3053,10 +3122,18 @@ function renderGameScreen() {
 }
 
 async function loadGameState() {
+  if (isGameStateLoading) {
+    shouldReloadGameState = true;
+    return;
+  }
+
+  isGameStateLoading = true;
+
   const isConnected = await testGameSupabaseConnection();
 
   if (!isConnected) {
     showGameError("Supabase 연결을 확인할 수 없습니다.");
+    isGameStateLoading = false;
     return;
   }
 
@@ -3064,6 +3141,7 @@ async function loadGameState() {
 
   if (!roomCode) {
     window.location.href = "./index.html";
+    isGameStateLoading = false;
     return;
   }
 
@@ -3098,12 +3176,30 @@ async function loadGameState() {
   } catch (error) {
     console.error("게임 상태 불러오기 실패:", error);
     showGameError("게임 정보를 불러오는 중 문제가 발생했습니다.");
+  } finally {
+    isGameStateLoading = false;
+
+    if (shouldReloadGameState) {
+      shouldReloadGameState = false;
+      scheduleGameStateRefresh();
+    }
   }
 }
 
+function scheduleGameStateRefresh() {
+  if (gameStateRefreshTimerId) {
+    window.clearTimeout(gameStateRefreshTimerId);
+  }
+
+  gameStateRefreshTimerId = window.setTimeout(function runScheduledRefresh() {
+    gameStateRefreshTimerId = null;
+    loadGameState();
+  }, 180);
+}
+
 function subscribeToGameChanges(roomId) {
-  subscribeToRoomChanges(roomId, loadGameState);
-  subscribeToPlayerChanges(roomId, loadGameState);
+  subscribeToRoomChanges(roomId, scheduleGameStateRefresh);
+  subscribeToPlayerChanges(roomId, scheduleGameStateRefresh);
   subscribeToChatChanges(roomId, loadChatMessages);
 }
 
