@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AUGMENT MAFIA</title>
+    <link rel="stylesheet" href="./mafia.css" />
+  </head>
+  <body>
+    <main class="home-page">
+      <section class="home-panel" aria-labelledby="game-title">
+        <header class="home-header">
+          <div class="brand-lockup">
+            <div class="brand-mark" aria-hidden="true">
+              <span class="brand-mark__core">AM</span>
+            </div>
+            <h1 id="game-title">AUGMENT MAFIA</h1>
+          </div>
+
+          <div class="auth-panel">
+            <div class="connection-status" id="connectionStatus" aria-live="polite">
+              Supabase 연결 확인 중...
+            </div>
+            <p class="auth-status" id="authStatus" aria-live="polite">로그인 확인 중...</p>
+
+            <form class="auth-form" id="authForm" novalidate>
+              <div class="field-group">
+                <label for="authUsernameInput">아이디</label>
+                <input
+                  type="text"
+                  id="authUsernameInput"
+                  name="username"
+                  maxlength="20"
+                  autocomplete="username"
+                  placeholder="아이디"
+                  aria-describedby="authMessage"
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="authPasswordInput">비밀번호</label>
+                <input
+                  type="password"
+                  id="authPasswordInput"
+                  name="password"
+                  minlength="6"
+                  autocomplete="current-password"
+                  placeholder="비밀번호"
+                  aria-describedby="authMessage"
+                />
+              </div>
+
+              <div class="auth-actions">
+                <button type="submit" class="primary-button" id="loginButton">로그인</button>
+                <button type="button" class="secondary-button" id="signupButton">회원가입</button>
+              </div>
+            </form>
+
+            <button type="button" class="ghost-button" id="logoutButton" hidden>로그아웃</button>
+            <p class="auth-message" id="authMessage" aria-live="polite"></p>
+          </div>
+        </header>
+
+        <div class="room-grid">
+          <section class="room-card room-card--join" aria-labelledby="joinTitle">
+            <h2 id="joinTitle">방 참가하기</h2>
+            <form class="join-room-form" id="joinRoomForm" novalidate>
+              <div class="field-group">
+                <div class="field-heading">
+                  <label for="joinNicknameInput">닉네임</label>
+                  <span>최대 12자</span>
+                </div>
+                <input
+                  type="text"
+                  id="joinNicknameInput"
+                  name="joinNickname"
+                  maxlength="12"
+                  autocomplete="nickname"
+                  placeholder="게임에서 사용할 이름"
+                  aria-describedby="joinMessage"
+                />
+              </div>
+
+              <div class="field-group">
+                <label for="roomCodeInput">방 코드</label>
+                <input
+                  type="text"
+                  id="roomCodeInput"
+                  name="roomCode"
+                  maxlength="6"
+                  placeholder="예: 7KQ9MP"
+                  aria-describedby="joinMessage"
+                />
+              </div>
+
+              <button type="submit" class="secondary-button room-action-button" id="joinRoomButton">
+                <span class="button-label">참가하기</span>
+              </button>
+              <p class="join-message" id="joinMessage" aria-live="polite"></p>
+            </form>
+          </section>
+
+          <section class="room-card room-card--create" aria-labelledby="createTitle">
+            <h2 id="createTitle">방 만들기</h2>
+            <form class="create-room-form" id="createRoomForm" novalidate>
+              <div class="field-group">
+                <div class="field-heading">
+                  <label for="createNicknameInput">닉네임</label>
+                  <span id="nicknameHelp">최대 12자</span>
+                </div>
+                <input
+                  type="text"
+                  id="createNicknameInput"
+                  name="createNickname"
+                  maxlength="12"
+                  autocomplete="nickname"
+                  placeholder="게임에서 사용할 이름"
+                  aria-describedby="nicknameHelp formMessage"
+                />
+              </div>
+
+              <button type="submit" class="primary-button room-action-button" id="createRoomButton">
+                <span class="button-spinner" aria-hidden="true"></span>
+                <span class="button-label">방 만들기</span>
+              </button>
+              <p class="form-message" id="formMessage" aria-live="polite"></p>
+            </form>
+          </section>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./mafia.js"></script>
+  </body>
+</html>

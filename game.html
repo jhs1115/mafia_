@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>게임 | AUGMENT MAFIA</title>
+    <link rel="stylesheet" href="./mafia.css" />
+  </head>
+  <body>
+    <main class="game-page">
+      <section class="game-shell" aria-labelledby="gamePageTitle">
+        <header class="game-header">
+          <div class="lobby-brand">
+            <span class="mini-mark" aria-hidden="true">AM</span>
+            <div>
+              <h1 id="gamePageTitle">게임</h1>
+            </div>
+          </div>
+          <span class="connection-status lobby-connection" id="gameConnectionStatus" aria-live="polite">
+            Supabase 연결 확인 중...
+          </span>
+        </header>
+
+        <div class="lobby-message" id="gameMessage" aria-live="polite"></div>
+
+        <div class="lobby-loading" id="gameLoading">
+          <span class="loading-ring" aria-hidden="true"></span>
+          <span>게임 정보를 불러오는 중...</span>
+        </div>
+
+        <div class="lobby-error" id="gameError" hidden>
+          <p id="gameErrorText">게임 정보를 불러오지 못했습니다.</p>
+          <div class="error-actions">
+            <button type="button" class="secondary-button" id="gameRetryButton">다시 시도</button>
+            <a class="text-link" href="./index.html">메인으로 돌아가기</a>
+          </div>
+        </div>
+
+        <section class="game-content" id="gameContent" hidden>
+          <section class="phase-panel" aria-labelledby="phaseTitle">
+            <div>
+              <p class="day-kicker" id="dayNumberText">1일차</p>
+              <h2 id="phaseTitle">-</h2>
+              <p id="phaseDescription">-</p>
+            </div>
+            <div class="timer-box" id="timerBox">
+              <span>남은 시간</span>
+              <strong id="remainingTimeText">--:--</strong>
+            </div>
+          </section>
+
+          <section class="role-reveal-view" id="roleRevealView" hidden>
+            <div class="role-card" id="roleCard">
+              <div class="role-card__front" id="roleCardFront">
+                <p>당신의 직업을 확인하세요.</p>
+                <span>다른 플레이어에게 화면을 보여주지 마세요.</span>
+                <button type="button" class="primary-button" id="revealRoleButton">
+                  <span class="button-label">직업 확인</span>
+                </button>
+              </div>
+
+              <div class="role-card__back" id="roleCardBack" hidden>
+                <p class="role-title" id="roleTitle">-</p>
+                <p class="role-description" id="roleDescription">-</p>
+                <p class="mafia-team" id="mafiaTeamText"></p>
+                <button type="button" class="primary-button" id="confirmRoleButton">
+                  <span class="button-label">확인 완료</span>
+                </button>
+              </div>
+            </div>
+
+            <div class="seen-waiting" id="seenWaitingView" hidden>
+              <p>다른 플레이어를 기다리는 중...</p>
+              <span id="seenCountText">직업 확인 완료 0 / 0</span>
+              <button type="button" class="ghost-button" id="showRoleAgainButton">직업 다시 보기</button>
+            </div>
+          </section>
+
+          <section class="action-area" id="actionArea" hidden>
+            <div class="player-list" id="targetList"></div>
+            <div class="confirm-box" id="confirmBox" hidden>
+              <p id="confirmText">선택을 확정하시겠습니까?</p>
+              <div class="error-actions">
+                <button type="button" class="primary-button" id="confirmActionButton">
+                  <span class="button-label">확정</span>
+                </button>
+                <button type="button" class="secondary-button" id="cancelActionButton">다시 선택</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="augment-view" id="augmentView" hidden>
+            <div class="augment-heading">
+              <div>
+                <h2 id="augmentTitle">증강 선택</h2>
+                <p id="augmentDescription">세 가지 증강 중 하나를 선택하세요.</p>
+              </div>
+              <button type="button" class="ghost-button" id="ownedAugmentsButton">내 증강</button>
+            </div>
+            <div class="augment-cards" id="augmentCards"></div>
+            <div class="confirm-box" id="augmentConfirmBox" hidden>
+              <p id="augmentConfirmText">이 증강을 선택하시겠습니까?</p>
+              <div class="error-actions">
+                <button type="button" class="primary-button" id="confirmAugmentButton">
+                  <span class="button-label">선택 확정</span>
+                </button>
+                <button type="button" class="secondary-button" id="cancelAugmentButton">다시 고르기</button>
+              </div>
+            </div>
+            <div class="owned-augments" id="ownedAugmentsPanel" hidden>
+              <h3>내 증강</h3>
+              <div id="ownedAugmentsList"></div>
+            </div>
+          </section>
+
+          <section class="result-panel" id="resultPanel" hidden>
+            <h2 id="resultTitle">결과</h2>
+            <p id="resultText">-</p>
+            <button type="button" class="primary-button" id="nextPhaseButton">
+              <span class="button-label">다음으로</span>
+            </button>
+          </section>
+
+          <section class="players-section" aria-labelledby="playersTitle">
+            <div class="section-heading">
+              <h2 id="playersTitle">플레이어</h2>
+              <span id="playerCountText">0명</span>
+            </div>
+            <div class="player-list" id="gamePlayerList"></div>
+          </section>
+
+          <section class="chat-placeholder" id="chatPlaceholder">
+            채팅 기능은 이후 작업에서 추가됩니다.
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./mafia.js"></script>
+  </body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>대기실 | AUGMENT MAFIA</title>
+    <link rel="stylesheet" href="./mafia.css" />
+  </head>
+  <body>
+    <main class="lobby-page">
+      <section class="lobby-shell" aria-labelledby="lobbyTitle">
+        <header class="lobby-header">
+          <div class="lobby-brand">
+            <span class="mini-mark" aria-hidden="true">AM</span>
+            <div>
+              <h1 id="lobbyTitle">대기실</h1>
+            </div>
+          </div>
+          <div class="lobby-actions">
+            <span class="connection-status lobby-connection" id="lobbyConnectionStatus" aria-live="polite">
+              Supabase 연결 확인 중...
+            </span>
+            <button type="button" class="ghost-button" id="leaveButton">나가기</button>
+          </div>
+        </header>
+
+        <div class="lobby-message" id="lobbyMessage" aria-live="polite"></div>
+
+        <div class="lobby-loading" id="lobbyLoading">
+          <span class="loading-ring" aria-hidden="true"></span>
+          <span>대기실 정보를 불러오는 중...</span>
+        </div>
+
+        <div class="lobby-error" id="lobbyError" hidden>
+          <p id="lobbyErrorText">대기실 정보를 불러오지 못했습니다.</p>
+          <div class="error-actions">
+            <button type="button" class="secondary-button" id="retryButton">다시 시도</button>
+            <a class="text-link" href="./index.html">메인으로 돌아가기</a>
+          </div>
+        </div>
+
+        <div class="lobby-content" id="lobbyContent" hidden>
+          <section class="room-info" aria-labelledby="roomCodeLabel">
+            <div>
+              <p class="room-code-label" id="roomCodeLabel">ROOM CODE</p>
+              <div class="room-code-row">
+                <p class="room-code" id="roomCodeText">------</p>
+                <button type="button" class="copy-button" id="copyRoomCodeButton">복사</button>
+              </div>
+            </div>
+
+            <dl class="room-stats">
+              <div>
+                <dt>상태</dt>
+                <dd id="roomStatusText">-</dd>
+              </div>
+              <div>
+                <dt>인원</dt>
+                <dd><span id="currentPlayersText">-</span> / <span id="maxPlayersText">-</span></dd>
+              </div>
+              <div>
+                <dt>생성 시간</dt>
+                <dd id="createdAtText">-</dd>
+              </div>
+            </dl>
+          </section>
+
+          <section class="players-section" aria-labelledby="playersTitle">
+            <div class="section-heading">
+              <h2 id="playersTitle">플레이어</h2>
+              <span id="playerCountText">0명</span>
+            </div>
+            <div class="start-condition" id="startConditionText" aria-live="polite"></div>
+            <div class="player-list" id="playerList"></div>
+          </section>
+
+          <footer class="lobby-footer">
+            <button type="button" class="secondary-button" id="readyButton">준비하기</button>
+            <button type="button" class="primary-button" id="startGameButton">
+              <span class="button-spinner" aria-hidden="true"></span>
+              <span class="button-label">게임 시작</span>
+            </button>
+          </footer>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./mafia.js"></script>
+  </body>
+</html>
